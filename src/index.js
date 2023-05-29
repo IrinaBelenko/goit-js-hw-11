@@ -2,6 +2,8 @@ import { UnsplashAPI } from './js/UnsplashAPI';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { createMarkupList } from './js/cardTemplate';
 import refs from './js/refs';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const NUMBER_OF_OBJECTS = 40;
 const unsplashApi = new UnsplashAPI(NUMBER_OF_OBJECTS);
@@ -61,13 +63,4 @@ async function handlerPagination() {
   }
 }
 
-// async function createByQueryPagination(event) {
-//   const currentPage = event.page;
-//   try {
-//     const response = await unsplashApi.getPhotosByQuery(currentPage);
-
-//     refs.galleryEl.innerHTML = createGalleryCard(response.data.results);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
+let gallery = new SimpleLightbox('.photo-card a');

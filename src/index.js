@@ -1,89 +1,65 @@
-// import onCheckboxClick from './js/thams';
-// import { UnsplashAPI } from './js/UnsplashAPI';
-// import createGalleryCard from './templates/gallery_card.hbs';
-// import refs from './js/refs';
-// import Pagination from 'tui-pagination';
-// import 'tui-pagination/dist/tui-pagination.css';
+import { UnsplashAPI } from './js/UnsplashAPI';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import { createMarkupList } from './js/cardTemplate';
+import refs from './js/refs';
 
-// const unsplashApi = new UnsplashAPI(12);
+const NUMBER_OF_OBJECTS = 40;
+const unsplashApi = new UnsplashAPI(NUMBER_OF_OBJECTS);
+let page = 1;
 
-// const options = {
-//   // below default value of options
-//   totalItems: 0,
-//   itemsPerPage: unsplashApi.per_page,
-//   visiblePages: 5,
-//   page: 1,
-// };
+refs.formEl.addEventListener('submit', onSearchFormSubmit);
+refs.loadMoreEl.addEventListener('click', handlerPagination);
 
-// const pagination = new Pagination(refs.container, options);
-// const page = pagination.getCurrentPage();
+async function onSearchFormSubmit(event) {
+  event.preventDefault();
+  refs.loadMoreEl.classList.add('is-hidden');
+  page = 1;
+  const searchQuery = event.currentTarget.elements.searchQuery.value.trim();
 
-// async function createPopularPagination(event) {
-//   const currentPage = event.page;
-//   try {
-//     const response = await unsplashApi.getPopularPhotos(currentPage);
+  unsplashApi.query = searchQuery;
 
-//     refs.galleryEl.innerHTML = createGalleryCard(response.data.results);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
+  if (!searchQuery) {
+    Notify.failure('Enter your request');
+  }
 
-// async function onRenderPage(page) {
-//   try {
-//     const response = await unsplashApi.getPopularPhotos(page);
+  try {
+    const response = await unsplashApi.getPhotosByQuery(page);
 
-//     if (response.data.results.length === 0) {
-//       return alert('server error');
-//     }
+    if (response.data.hits.length === 0) {
+      Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+      return;
+    }
 
-//     refs.galleryEl.innerHTML = createGalleryCard(response.data.results);
+    refs.galleryEl.innerHTML = createMarkupList(response.data.hits);
 
-//     pagination.reset(response.data.total);
-//     refs.container.classList.remove('is-hidden');
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
+    refs.loadMoreEl.classList.remove('is-hidden');
+  } catch (error) {
+    console.log(error);
+  }
+}
 
-// onRenderPage(page);
-// pagination.on('afterMove', createPopularPagination);
+async function handlerPagination() {
+  page += 1;
+  console.log(page);
+  console.log(page * NUMBER_OF_OBJECTS);
+  unsplashApi.query = refs.formEl.elements.searchQuery.value;
+  try {
+    const response = await unsplashApi.getPhotosByQuery(page);
+    refs.galleryEl.insertAdjacentHTML(
+      'beforeend',
+      createMarkupList(response.data.hits)
+    );
 
-// //* пошук по формі
-
-// refs.formEl.addEventListener('submit', onSearchFormSubmit);
-
-// async function onSearchFormSubmit(event) {
-//   event.preventDefault();
-
-//   pagination.off('afterMove', createPopularPagination);
-
-//   const searchQuery =
-//     event.currentTarget.elements['user-search-query'].value.trim();
-
-//   unsplashApi.query = searchQuery;
-
-//   if (!searchQuery) {
-//     return alert('Введіть ваш запит');
-//   }
-
-//   try {
-//     const response = await unsplashApi.getPhotosByQuery(page);
-
-//     refs.galleryEl.innerHTML = createGalleryCard(response.data.results);
-
-//     pagination.reset(response.data.total);
-//     refs.container.classList.remove('is-hidden');
-
-//     pagination.on('afterMove', createByQueryPagination);
-
-//     if (response.data.total < unsplashApi.per_page) {
-//       refs.container.classList.add('is-hidden');
-//     }
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
+    if (response.data.totalHits <= page * NUMBER_OF_OBJECTS) {
+      refs.loadMoreEl.classList.add('is-hidden');
+      Notify.info("We're sorry, but you've reached the end of search results.");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 // async function createByQueryPagination(event) {
 //   const currentPage = event.page;
@@ -95,5 +71,3 @@
 //     console.log(error);
 //   }
 // }
-
-// refs.checkBoxEl.addEventListener('change', onCheckboxClick);

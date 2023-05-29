@@ -4,32 +4,24 @@
 import axios from 'axios';
 
 export class UnsplashAPI {
-  #BASE_URL = 'https://api.unsplash.com';
-  #API_KEY = 'LxvKVGJqiSe6NcEVZOaLXC-f2JIIWZaq_o0WrF8mwJc';
+  #BASE_URL = 'https://pixabay.com/api/';
+  #API_KEY = '36838949-c6733ba7cda813dd9dfa43f4c';
   #query = '';
 
-  constructor(perPage = 12) {
+  constructor(perPage = 10) {
     this.per_page = perPage;
   }
 
-  getPopularPhotos(page) {
-    return axios.get(`${this.#BASE_URL}/search/photos`, {
-      params: {
-        query: 'random',
-        page,
-        per_page: this.per_page,
-        client_id: this.#API_KEY,
-      },
-    });
-  }
-
   getPhotosByQuery(page) {
-    return axios.get(`${this.#BASE_URL}/search/photos`, {
+    return axios.get(`${this.#BASE_URL}`, {
       params: {
-        query: this.#query,
+        key: this.#API_KEY,
+        q: this.#query,
+        image_type: 'photo',
+        orientation: 'horizontal',
+        safesearch: 'true',
         page,
         per_page: this.per_page,
-        client_id: this.#API_KEY,
       },
     });
   }

@@ -3,7 +3,7 @@
 
 import axios from 'axios';
 
-export class UnsplashAPI {
+export class PixabayAPI {
   #BASE_URL = 'https://pixabay.com/api/';
   #API_KEY = '36838949-c6733ba7cda813dd9dfa43f4c';
   #query = '';
